@@ -20,3 +20,7 @@ Courtesy of [Enclaver](https://edgebit.io/enclaver/docs/0.x/guide-vault/).
 - [ ] integrating with a proper certificate authority (not self-signed)
 - [ ] Improve Vault internal Configuration (auth, ACLs, etc)
 - [ ] TLS everywhere (consul etc)
+- [ ] backup and restore procedures for the Vault data.
+- [ ] HA multi-node Vault
+- [ ] Monitoring and Logging
+- [ ] external identity providers
