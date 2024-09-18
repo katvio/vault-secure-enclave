@@ -1,0 +1,53 @@
+ssh -i "~/Downloads/hcp-vault-demo.pem" ec2-user@ec2-3-80-247-28.compute-1.amazonaws.com
+
+export DATA_DIR="/home/ec2-user/consul_data_dir"
+
+export AWS_KEY_ID=fc5eeebc-32d5-4bea-9800-557f5f81786e
+export AWS_DEFAULT_REGION="us-east-1"
+
+curl -LO https://github.com/edgebitio/enclaver/releases/download/v0.4.3/enclaver-linux-x86_64-v0.4.3.tar.gz
+tar -xzf enclaver-linux-x86_64-v0.4.3.tar.gz
+cd enclaver-linux-x86_64-v0.4.3/
+sudo mv enclaver /usr/local/bin/
+sudo chmod +x /usr/local/bin/enclaver
+
+enclaver --version
+enclaver build -f enclaver.yaml
+
+Built Release Image: sha256:1fb501105156a26ad97d6549a7e64870e2bfb71f02192c1099715eae06c9c253 (vault:enclave)
+EIF Info:
+
+{
+  "Measurements": {
+    "PCR0": "409ccea26dd85ecebae3b2c9b22b8a5872d9cff51a2d2a4f7613e73f9227ee6f8c71b6ef1d28e43df5ba723d9f855394",
+    "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+    "PCR2": "b08cf7f41aed4bea22c885a07116c846cc0549b8fccc3bf2ae946f344720f3eb50868df64cf0616f66b1b115c04f79c6"
+  }
+}
+
+docker run --rm -it   --net=host   --privileged   --name=vault   --device=/dev/nitro_enclaves   vault:enclave
+
+
+docker run --rm -it --cap-add IPC_LOCK --net=host \
+  -v $(pwd):/opt/ \
+  -e VAULT_ADDR=https://127.0.0.1:8200 \
+  -e VAULT_CACERT=/opt/cert.pem \
+  hashicorp/vault:latest operator init
+
+Recovery Key 1: ngQCQt7+aPjjfKXEnP6VkELDR/ywdyOsJKbggiEk5+hA
+Recovery Key 2: u4W7zwmZ0Uf6Lwt8ysgd74Z/oBMHaps7XUuK8/gKRMwg
+Recovery Key 3: Bf++KzmGdU7kna1mqNbI1vLbaMRk3eC0CmWdyF4r64S5
+Recovery Key 4: NmdZbG2ePVbfsW5VeLO7tLaZttyy49XG60w9E3MWTwmV
+Recovery Key 5: 2SOZ/ntD7qk4WTF7os5T22vFjYCQPQWFSiFDcZqktmhu
+
+Initial Root Token: hvs.F1LDOtfqdzNKAL5no7g5Jzwc
+
+Success! Vault is initialized
+
+
+docker run --rm -d   --net=host   --privileged   --name=vault   --device=/dev/nitro_enclaves   vault:enclave
+
+
+export VAULT_TOKEN=hvs.F1LDOtfqdzNKAL5no7g5Jzwc
+alias vault-cli="docker run --rm -it --net=host -v $(pwd):/opt/ -e VAULT_ADDR=https://127.0.0.1:8200 -e VAULT_CACERT=/opt/cert.pem -e VAULT_TOKEN=$VAULT_TOKEN hashicorp/vault:latest"
+
